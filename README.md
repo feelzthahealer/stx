@@ -22,7 +22,7 @@ Features
 Installation
 
 1. Clone the repository:
-   git clone https://github.com/yourusername/stx.git
+   git clone https://github.com/feelzthahealer/stx.git
    cd stx
 2. Make the script executable:
   chmod +x stx
