@@ -22,12 +22,17 @@ Features
 Installation
 
 1. Clone the repository:
+   
    git clone https://github.com/feelzthahealer/stx.git
    cd stx
-2. Make the script executable:
+   
+3. Make the script executable:
+   
   chmod +x stx
-3. Move it into your $PATH (e.g., /usr/local/bin):
-   sudo mv stx /usr/local/bin/
+  
+5. Move it into your $PATH (e.g., /usr/local/bin):
+
+    sudo mv stx /usr/local/bin/
 
 ---
 Usage
