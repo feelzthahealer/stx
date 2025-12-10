@@ -1,0 +1,177 @@
+#!/bin/bash
+# stx - Unified package manager for Arch Linux
+# Supports pacman, yay, paru, flatpak, snap, git, pip, npm, cargo
+
+SERVICES=("pacman" "yay" "paru" "flatpak" "snap" "git" "pip" "npm" "cargo")
+
+usage() {
+    echo "Usage: sudo stx {aquire|purge} <package>"
+    exit 1
+}
+
+if [ $# -lt 2 ]; then
+    usage
+fi
+
+COMMAND=$1
+PACKAGE=$2
+
+### PACMAN ###
+aquire_pacman() {
+    if pacman -Si "$PACKAGE" &>/dev/null; then
+        echo "[stx] Installing $PACKAGE via pacman..."
+        pacman -S --noconfirm "$PACKAGE"
+        return 0
+    fi
+    return 1
+}
+purge_pacman() {
+    if pacman -Qi "$PACKAGE" &>/dev/null; then
+        echo "[stx] Removing $PACKAGE via pacman..."
+        pacman -Rns --noconfirm "$PACKAGE"
+        return 0
+    fi
+    return 1
+}
+
+### YAY ###
+aquire_yay() {
+    if yay -Si "$PACKAGE" &>/dev/null; then
+        echo "[stx] Installing $PACKAGE via yay..."
+        yay -S --noconfirm "$PACKAGE"
+        return 0
+    fi
+    return 1
+}
+purge_yay() {
+    if yay -Qi "$PACKAGE" &>/dev/null; then
+        echo "[stx] Removing $PACKAGE via yay..."
+        yay -Rns --noconfirm "$PACKAGE"
+        return 0
+    fi
+    return 1
+}
+
+### PARU ###
+aquire_paru() {
+    if paru -Si "$PACKAGE" &>/dev/null; then
+        echo "[stx] Installing $PACKAGE via paru..."
+        paru -S --noconfirm "$PACKAGE"
+        return 0
+    fi
+    return 1
+}
+purge_paru() {
+    if paru -Qi "$PACKAGE" &>/dev/null; then
+        echo "[stx] Removing $PACKAGE via paru..."
+        paru -Rns --noconfirm "$PACKAGE"
+        return 0
+    fi
+    return 1
+}
+
+### FLATPAK ###
+aquire_flatpak() {
+    if flatpak search "$PACKAGE" | grep -q "$PACKAGE"; then
+        echo "[stx] Installing $PACKAGE via flatpak..."
+        flatpak install -y "$PACKAGE"
+        return 0
+    fi
+    return 1
+}
+purge_flatpak() {
+    if flatpak list | grep -q "$PACKAGE"; then
+        echo "[stx] Removing $PACKAGE via flatpak..."
+        flatpak uninstall -y "$PACKAGE"
+        return 0
+    fi
+    return 1
+}
+
+### SNAP ###
+aquire_snap() {
+    if snap find "$PACKAGE" | grep -q "$PACKAGE"; then
+        echo "[stx] Installing $PACKAGE via snap..."
+        snap install "$PACKAGE"
+        return 0
+    fi
+    return 1
+}
+purge_snap() {
+    if snap list | grep -q "$PACKAGE"; then
+        echo "[stx] Removing $PACKAGE via snap..."
+        snap remove "$PACKAGE"
+        return 0
+    fi
+    return 1
+}
+
+### GIT ###
+aquire_git() {
+    echo "[stx] Cloning $PACKAGE via git..."
+    git clone "https://github.com/$PACKAGE.git" "/opt/$PACKAGE"
+    return 0
+}
+purge_git() {
+    if [ -d "/opt/$PACKAGE" ]; then
+        echo "[stx] Removing git repo for $PACKAGE..."
+        rm -rf "/opt/$PACKAGE"
+        return 0
+    fi
+    return 1
+}
+
+### PIP ###
+aquire_pip() {
+    echo "[stx] Installing $PACKAGE via pip..."
+    pip install "$PACKAGE"
+    return 0
+}
+purge_pip() {
+    echo "[stx] Removing $PACKAGE via pip..."
+    pip uninstall -y "$PACKAGE"
+    return 0
+}
+
+### NPM ###
+aquire_npm() {
+    echo "[stx] Installing $PACKAGE via npm..."
+    npm install -g "$PACKAGE"
+    return 0
+}
+purge_npm() {
+    echo "[stx] Removing $PACKAGE via npm..."
+    npm uninstall -g "$PACKAGE"
+    return 0
+}
+
+### CARGO ###
+aquire_cargo() {
+    echo "[stx] Installing $PACKAGE via cargo..."
+    cargo install "$PACKAGE"
+    return 0
+}
+purge_cargo() {
+    echo "[stx] Removing $PACKAGE via cargo..."
+    cargo uninstall "$PACKAGE"
+    return 0
+}
+
+### Dispatcher ###
+case $COMMAND in
+    aquire)
+        for svc in "${SERVICES[@]}"; do
+            "aquire_$svc" && exit 0
+        done
+        echo "[stx] ERROR: Could not acquire $PACKAGE"
+        ;;
+    purge)
+        for svc in "${SERVICES[@]}"; do
+            "purge_$svc" && exit 0
+        done
+        echo "[stx] ERROR: Could not purge $PACKAGE"
+        ;;
+    *)
+        usage
+        ;;
+esac
