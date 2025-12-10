@@ -28,7 +28,7 @@ Installation
    
 3. Make the script executable:
    
-  chmod +x stx
+   chmod +x stx
   
 5. Move it into your $PATH (e.g., /usr/local/bin):
 
